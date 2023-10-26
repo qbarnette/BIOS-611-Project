@@ -1,0 +1,89 @@
+---
+title: "skeleton"
+output: html_document
+date: "2023-10-25"
+---
+
+```{r, echo=FALSE, message=F, warning=FALSE}
+
+# Load libraries
+library(httr)
+library(lubridate)
+library(openxlsx)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(reshape2)
+library(kableExtra)
+
+
+# Set the directory path
+directory_path <- "C:/Users/qbarnette/OneDrive - Research Triangle Institute/UNC/BIOS 611/bios_611_project/source_data"
+
+# List all the files in the directory
+data_files <- list.files(directory_path)
+
+# Check the list of data files
+data_files
+
+data_list <- list() # Initialize a list to store data frames
+
+for (file in data_files) {
+  file_path <- file.path(directory_path, file)
+  data <- read.csv(file_path)
+  data_list[[file]] <- data
+}
+
+merged_data <- bind_rows(data_list)
+
+# Export the merged dataset to a CSV file
+write.csv(merged_data, file = "merged_data.csv", row.names = FALSE)
+
+
+```
+
+
+```{r, echo=FALSE, message=F, warning=FALSE}
+
+library(ggplot2)
+
+ggplot(merged_data, aes(x = State)) +
+  geom_bar(fill = "lightblue") +
+  labs(title = "Missing Persons by State") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+
+```
+
+
+```{r, echo=FALSE, message=F, warning=FALSE}
+library(ggplot2)
+
+# Assuming your dataset is named 'merged_data'
+# Extract the 'Missing.Age' column
+# Ensure that 'Missing.Age' is a character column
+merged_data$Missing.Age <- as.character(merged_data$Missing.Age)
+
+# Create age bins in groups of 5
+merged_data$Age_Group <- cut(as.numeric(gsub(" Years", "", merged_data$Missing.Age)), 
+                            breaks = seq(0, max(as.numeric(gsub(" Years", "", merged_data$Missing.Age)), na.rm = TRUE) + 5, by = 5),
+                            labels = paste0(seq(0, max(as.numeric(gsub(" Years", "", merged_data$Missing.Age)), na.rm = TRUE), by = 5), "-", seq(4, max(as.numeric(gsub(" Years", "", merged_data$Missing.Age)), na.rm = TRUE) + 4, by = 5)))
+
+# Create a data frame with the count of missing persons by age group
+missing_by_age_group <- merged_data %>%
+  group_by(Age_Group) %>%
+  summarise(Count = n())
+
+# Create a bar chart for missing persons by age group
+ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill = Age_Group)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  labs(title = "Missing Persons by Age Group (in 5-year intervals)", x = "Age Group") +  # Set x-axis label
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
+

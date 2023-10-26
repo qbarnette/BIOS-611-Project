@@ -5,6 +5,9 @@ FROM rocker/verse
 RUN apt-get update && apt-get install -y man-db
 #RUN apt update && apt install -y man-db && rm -rf /var/lib/apt/lists/*
 
+# Unminimize the image to install additional packages and utilities
+RUN unminimize
+
 # Install R packages 
 RUN R -e "install.packages('matlab')"
 
