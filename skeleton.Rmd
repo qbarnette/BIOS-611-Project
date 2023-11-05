@@ -18,30 +18,73 @@ library(reshape2)
 library(kableExtra)
 
 
-# Set the directory path
-directory_path <- "C:/Users/qbarnette/OneDrive - Research Triangle Institute/UNC/BIOS 611/bios_611_project/source_data"
+# Set the working directory to the "source_data" folder
+setwd("C:/Users/qbarnette/OneDrive - Research Triangle Institute/UNC/BIOS 611/bios_611_project/source_data")
 
-# List all the files in the directory
-data_files <- list.files(directory_path)
 
-# Check the list of data files
-data_files
-
-data_list <- list() # Initialize a list to store data frames
-
-for (file in data_files) {
-  file_path <- file.path(directory_path, file)
-  data <- read.csv(file_path)
-  data_list[[file]] <- data
-}
-
-merged_data <- bind_rows(data_list)
-
-# Export the merged dataset to a CSV file
-write.csv(merged_data, file = "merged_data.csv", row.names = FALSE)
+# Load the "merged_data" dataset from the CSV file
+chart <- read.csv("merged_data.csv")
 
 
 ```
+
+```{r}
+
+#recode Race so that any response with multiple responses is "Multiple"
+unique(merged_data$Race...Ethnicity)
+
+merged_data$Race...Ethnicity[str_detect(merged_data$Race...Ethnicity, ",")] = "Multiple"
+
+# Check the unique values in the modified variable
+unique(data$Race...Ethnicity)
+
+
+
+
+
+category_counts <- table(merged_data$Race...Ethnicity)
+
+# Create a data frame for plotting
+category_data <- data.frame(Category = names(category_counts), Count = as.numeric(category_counts))
+
+# Create a bar plot
+ggplot(category_data, aes(x = Category, y = Count)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Race...Ethnicity", y = "Count of Entries") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+
+
+
+```
+
+```{r}
+#Calulate length of time in database
+
+# Load the lubridate package if not already installed
+# install.packages("lubridate")
+library(lubridate)
+
+# Convert the "DLC" column to a Date object
+merged_data$DLC <- mdy(merged_data$DLC)  # Assumes month-day-year format, adjust if needed
+
+# Calculate the difference between today and the "DLC" dates
+merged_data$Days_In_Dataset <- as.numeric(difftime(Sys.Date(), merged_data$DLC, units = "days"))
+
+
+# Create a summary data frame with the average length of time by "Race...Ethnicity"
+summary_data <- aggregate(Days_In_Dataset ~ Race...Ethnicity, data = merged_data, FUN = mean)
+
+# Create a bar plot
+ggplot(summary_data, aes(x = Race...Ethnicity, y = Days_In_Dataset)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Race...Ethnicity", y = "Average Length of Time") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+```
+
 
 
 ```{r, echo=FALSE, message=F, warning=FALSE}
@@ -82,6 +125,13 @@ ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill
   labs(title = "Missing Persons by Age Group (in 5-year intervals)", x = "Age Group") +  # Set x-axis label
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
+```{r}
+
+
 
 
 

@@ -1,0 +1,180 @@
+---
+title: "Dimensionality HW"
+output: html_document
+date: "2023-11-02"
+---
+
+```{r}
+# Load the "merged_data" dataset from the CSV file
+merged_data <- read.csv("source_data/merged_data.csv")
+```
+
+# Recode and Visualize Race/Ethnicity
+
+```{r}
+
+#recode Race so that any response with multiple responses is "Multiple"
+unique(merged_data$Race...Ethnicity)
+
+merged_data$Race...Ethnicity[str_detect(merged_data$Race...Ethnicity, ",")] = "Multiple"
+
+# Check the unique values in the modified variable
+unique(data$Race...Ethnicity)
+
+
+category_counts <- table(merged_data$Race...Ethnicity)
+
+# Create a data frame for plotting
+category_data <- data.frame(Category = names(category_counts), Count = as.numeric(category_counts))
+
+# Create a bar plot
+ggplot(category_data, aes(x = Category, y = Count)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Race...Ethnicity", y = "Count of Entries") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+
+
+
+```
+
+# Calculate Length of Time in Database
+```{r}
+
+#Calulate length of time in database
+
+# Load the lubridate package if not already installed
+install.packages("lubridate")
+library(lubridate)
+
+# Convert the "DLC" column to a Date object
+merged_data$DLC <- mdy(merged_data$DLC)  # Assumes month-day-year format, adjust if needed
+
+# Calculate the difference between today and the "DLC" dates
+merged_data$Days_In_Dataset <- as.numeric(difftime(Sys.Date(), merged_data$DLC, units = "days"))
+
+
+# Create a summary data frame with the average length of time by "Race...Ethnicity"
+summary_data <- aggregate(Days_In_Dataset ~ Race...Ethnicity, data = merged_data, FUN = mean)
+
+# Create a bar plot
+ggplot(summary_data, aes(x = Race...Ethnicity, y = Days_In_Dataset)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Race...Ethnicity", y = "Average Length of Time") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+
+
+```
+
+#PCA 
+
+The PCA plot  indicates that the first two principal components (PC1 and PC2) explain all of the variance. This means that we can  reduce the dimensionality of the data by using only PC1 and PC2 while preserving most of the variance. 
+
+```{r}
+
+# Install necessary packages for PCA
+install.packages("FactoMineR")
+install.packages("factoextra")
+
+# Load necessary libraries for PCA
+library(FactoMineR)
+library(factoextra)
+
+# Clean the "Missing.Age" column 
+merged_data$Missing.Age <- as.numeric(gsub("[^0-9.]", "", merged_data$Missing.Age))
+
+numeric_data <- merged_data[, c("Missing.Age", "Days_In_Dataset")]
+
+sapply(numeric_data, is.numeric)
+
+# Perform PCA
+pca_result <- PCA(numeric_data, graph = FALSE)
+
+# Plot the variance explained by each principal component
+fviz_eig(pca_result, addlabels = TRUE, ylim = c(0, 50))
+
+
+```
+
+#Cluster Analysis
+
+```{r}
+library(ggplot2)
+
+# Assuming 'pca_result' is the object containing your PCA results
+pca_data <- as.data.frame(pca_result$ind$coord[, c("Dim.1", "Dim.2")])
+ggplot(pca_data, aes(x = Dim.1, y = Dim.2)) + geom_point()
+
+
+threshold1 <- 1.0
+threshold2 <- 0.5
+threshold3 <- -0.5
+threshold4 <- -1.0
+
+cluster1_indices <- which(pca_data$Dim.1 >= threshold1 & pca_data$Dim.2 >= threshold2)
+cluster2_indices <- which(pca_data$Dim.1 <= threshold3 & pca_data$Dim.2 <= threshold4)
+
+cluster1_data <- numeric_data[cluster1_indices, ]
+cluster2_data <- numeric_data[cluster2_indices, ]
+
+```
+
+#t-SNE Projection
+```{r}
+
+# Load necessary libraries
+install.packages("Rtsne")
+library(Rtsne)
+library(ggplot2)
+
+# Assuming 'numeric_data' is your dataset
+set.seed(123)  # For reproducibility
+
+numeric_data <- numeric_data[complete.cases(numeric_data), ]
+
+# Remove duplicate rows
+numeric_data <- numeric_data[!duplicated(numeric_data), ]
+
+# Perform t-SNE on your dataset
+tsne_result <- Rtsne(numeric_data, dims = 2, perplexity = 30, verbose = TRUE)
+
+
+# Create a data frame with t-SNE results
+tsne_data <- data.frame(x = tsne_result$Y[, 1], y = tsne_result$Y[, 2])
+
+# Create a scatter plot of the t-SNE projection
+ggplot(tsne_data, aes(x, y)) + geom_point()
+
+
+
+```
+# Cluster Analysis
+```{r}
+# Perform k-means clustering on t-SNE projections (5 clusters)
+set.seed(123)  # For reproducibility
+kmeans_tsne <- kmeans(tsne_result$Y, centers = 5)
+
+# Assuming 'pca_result' is the PCA result from previous analysis
+# Perform k-means clustering on the first 50 dimensions of PCA data (5 clusters)
+set.seed(123)  # For reproducibility
+kmeans_pca <- kmeans(pca_result$ind$coord[, 1:2], centers = 5)
+
+install.packages("infotheo")
+library(infotheo)
+
+cluster1 <- kmeans_tsne$cluster
+cluster2 <- kmeans_pca$cluster
+
+# Calculate NMI using the infotheo package
+nmi_value <- NMI(cluster1, cluster2)
+
+
+
+
+
+
+```
+
