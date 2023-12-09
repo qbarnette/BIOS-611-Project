@@ -7,7 +7,9 @@ date: "2023-10-25"
 ```{r, echo=FALSE, message=F, warning=FALSE}
 
 # Load libraries
+rm(list = ls())
 library(httr)
+library(lmtest)
 library(lubridate)
 library(openxlsx)
 library(dplyr)
@@ -23,7 +25,7 @@ setwd("C:/Users/qbarnette/OneDrive - Research Triangle Institute/UNC/BIOS 611/bi
 
 
 # Load the "merged_data" dataset from the CSV file
-chart <- read.csv("merged_data.csv")
+merged_data <- read.csv("merged_data.csv")
 
 
 ```
@@ -36,11 +38,7 @@ unique(merged_data$Race...Ethnicity)
 merged_data$Race...Ethnicity[str_detect(merged_data$Race...Ethnicity, ",")] = "Multiple"
 
 # Check the unique values in the modified variable
-unique(data$Race...Ethnicity)
-
-
-
-
+unique(merged_data$Race...Ethnicity)
 
 category_counts <- table(merged_data$Race...Ethnicity)
 
@@ -50,7 +48,7 @@ category_data <- data.frame(Category = names(category_counts), Count = as.numeri
 # Create a bar plot
 ggplot(category_data, aes(x = Category, y = Count)) +
   geom_bar(stat = "identity") +
-  labs(x = "Race...Ethnicity", y = "Count of Entries") +
+  labs(x = "Race...Ethnicity", y = "Count") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
 
@@ -74,17 +72,25 @@ merged_data$Days_In_Dataset <- as.numeric(difftime(Sys.Date(), merged_data$DLC, 
 
 
 # Create a summary data frame with the average length of time by "Race...Ethnicity"
-summary_data <- aggregate(Days_In_Dataset ~ Race...Ethnicity, data = merged_data, FUN = mean)
+summary_dataR <- aggregate(Days_In_Dataset ~ Race...Ethnicity, data = merged_data, FUN = mean)
+summary_dataS <- aggregate(Days_In_Dataset ~Sex, data = merged_data, FUN = mean)
 
 # Create a bar plot
-ggplot(summary_data, aes(x = Race...Ethnicity, y = Days_In_Dataset)) +
+ggplot(summary_dataR, aes(x = Race...Ethnicity, y = Days_In_Dataset)) +
   geom_bar(stat = "identity") +
   labs(x = "Race...Ethnicity", y = "Average Length of Time") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
 
-```
+# Create a bar plot
+ggplot(summary_dataS, aes(x = Sex, y = Days_In_Dataset)) +
+  geom_bar(stat = "identity") +
+  labs(x = "", y = "Average Length of Time") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) 
 
+
+```
 
 
 ```{r, echo=FALSE, message=F, warning=FALSE}
@@ -122,16 +128,43 @@ missing_by_age_group <- merged_data %>%
 # Create a bar chart for missing persons by age group
 ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill = Age_Group)) +
   geom_bar(stat = "identity", width = 0.5) +
-  labs(title = "Missing Persons by Age Group (in 5-year intervals)", x = "Age Group") +  # Set x-axis label
+  labs(title = "Missing Persons by Age Group", x = "Age Group") +  # Set x-axis label
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  guides(fill = "none")  
 
 
 
 ```
 ```{r}
 
+# Create a linear regression model
+model_sex <- lm(Days_In_Dataset ~ Sex, data = merged_data)
 
+# Convert 'Race...Ethnicity' to a factor
+merged_data$Race...Ethnicity <- as.factor(merged_data$Race...Ethnicity)
+
+# Set "White / Caucasian" as the reference category
+merged_data$Race...Ethnicity <- relevel(merged_data$Race...Ethnicity, ref = "White / Caucasian")
+
+model_race <- lm(Days_In_Dataset ~ Race...Ethnicity, data = merged_data)
+
+# Check the model summary
+sum_model_sex <- summary(model_sex)
+sum_model_race <- summary(model_race)
+
+
+# Tidy the model results
+tidy_model_sex <- tidy(model_sex)
+
+# Display the tidy model results in a table
+print(tidy_model_sex)
+
+
+tidy_model_race <- tidy(model_race)
+
+# Display the tidy model results in a table
+print(tidy_model_race)
 
 
 
