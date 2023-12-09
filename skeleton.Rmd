@@ -153,13 +153,11 @@ model_race <- lm(Days_In_Dataset ~ Race...Ethnicity, data = merged_data)
 sum_model_sex <- summary(model_sex)
 sum_model_race <- summary(model_race)
 
-
 # Tidy the model results
 tidy_model_sex <- tidy(model_sex)
 
 # Display the tidy model results in a table
 print(tidy_model_sex)
-
 
 tidy_model_race <- tidy(model_race)
 
