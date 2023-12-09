@@ -1,6 +1,5 @@
-library(ggplot2)
+#generate age group figure
 
-# Extract the 'Missing.Age' column
 # Ensure that 'Missing.Age' is a character column
 merged_data$Missing.Age <- as.character(merged_data$Missing.Age)
 
@@ -17,6 +16,7 @@ missing_by_age_group <- merged_data %>%
 # Create a bar chart for missing persons by age group
 ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill = Age_Group)) +
   geom_bar(stat = "identity", width = 0.5) +
-  labs(title = "Missing Persons by Age Group (in 5-year intervals)", x = "Age Group") +  # Set x-axis label
+  labs(title = "Missing Persons by Age Group", x = "Age Group") +  # Set x-axis label
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  guides(fill = "none")  
