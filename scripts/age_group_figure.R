@@ -1,5 +1,3 @@
-#generate age group figure
-
 # Ensure that 'Missing.Age' is a character column
 merged_data$Missing.Age <- as.character(merged_data$Missing.Age)
 
@@ -18,5 +16,10 @@ ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill
   geom_bar(stat = "identity", width = 0.5) +
   labs(title = "Missing Persons by Age Group", x = "Age Group") +  # Set x-axis label
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.background = element_rect(fill = "white"))+
   guides(fill = "none")  
+
+
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/agegroup_figure.png", width = 6, height = 4)

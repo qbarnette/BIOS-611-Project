@@ -10,6 +10,7 @@ date: "2023-10-25"
 rm(list = ls())
 library(httr)
 library(lmtest)
+library(broom)
 library(lubridate)
 library(openxlsx)
 library(dplyr)
@@ -19,19 +20,16 @@ library(knitr)
 library(reshape2)
 library(kableExtra)
 
-
-# Set the working directory to the "source_data" folder
-setwd("C:/Users/qbarnette/OneDrive - Research Triangle Institute/UNC/BIOS 611/bios_611_project/source_data")
-
-
-# Load the "merged_data" dataset from the CSV file
-merged_data <- read.csv("merged_data.csv")
-
+merged_data <- read.csv("source_data/merged_data.csv")
 
 ```
 
 ```{r}
 #generate race count figure
+
+merged_data <- read.csv("source_data/merged_data.csv")
+
+
 #recode Race so that any response with multiple responses is "Multiple"
 unique(merged_data$Race...Ethnicity)
 
@@ -50,12 +48,18 @@ ggplot(category_data, aes(x = Category, y = Count)) +
   geom_bar(stat = "identity") +
   labs(x = "Race...Ethnicity", y = "Count") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+  panel.background = element_rect(fill = "white"))
+
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/racecount_figure.png", width = 6, height = 4)
+
 
 ```
 
 ```{r}
 #generate racetime figure
+
 # Convert the "DLC" column to a Date object
 merged_data$DLC <- mdy(merged_data$DLC)  # Assumes month-day-year format, adjust if needed
 
@@ -70,12 +74,17 @@ ggplot(summary_dataR, aes(x = Race...Ethnicity, y = Days_In_Dataset)) +
   geom_bar(stat = "identity") +
   labs(x = "Race...Ethnicity", y = "Average Length of Time") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.background = element_rect(fill = "white"))
+
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/racetime_figure.png", width = 6, height = 4)
 
 ```
 
 ```{r}
 #generate sex figure
+
 
 summary_dataS <- aggregate(Days_In_Dataset ~Sex, data = merged_data, FUN = mean)
 
@@ -84,7 +93,11 @@ ggplot(summary_dataS, aes(x = Sex, y = Days_In_Dataset)) +
   geom_bar(stat = "identity") +
   labs(x = "", y = "Average Length of Time") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 0, hjust = 1)) 
+  theme(axis.text.x = element_text(angle = 0, hjust = 1),
+         panel.background = element_rect(fill = "white"))
+
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/sex_figure.png", width = 6, height = 4)
 
 ```
 
@@ -101,7 +114,11 @@ ggplot(merged_data, aes(x = State)) +
   geom_bar(fill = "lightblue") +
   labs(title = "Missing Persons by State") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+  theme(axis.text.x = element_text(angle = 80, hjust = 1),
+               panel.background = element_rect(fill = "white"))
+
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/state_figure.png", width = 6, height = 4)
 
 
 ```
@@ -128,13 +145,20 @@ ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill
   geom_bar(stat = "identity", width = 0.5) +
   labs(title = "Missing Persons by Age Group", x = "Age Group") +  # Set x-axis label
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.background = element_rect(fill = "white"))+
   guides(fill = "none")  
+             
 
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/agegroup_figure.png", width = 6, height = 4)
 
 ```
 ```{r}
 # linear regression: sex
+
+library(lmtest)
+library(tidyverse)
 
 # Create a linear regression model
 model_sex <- lm(Days_In_Dataset ~ Sex, data = merged_data)
@@ -152,6 +176,9 @@ print(tidy_model_sex)
 
 ```{r}
 #linear regression: race/ethnicity
+
+library(lmtest)
+library(tidyverse)
 
 # Convert 'Race...Ethnicity' to a factor
 merged_data$Race...Ethnicity <- as.factor(merged_data$Race...Ethnicity)

@@ -1,4 +1,5 @@
 #generate racetime figure
+
 # Convert the "DLC" column to a Date object
 merged_data$DLC <- mdy(merged_data$DLC)  # Assumes month-day-year format, adjust if needed
 
@@ -13,4 +14,8 @@ ggplot(summary_dataR, aes(x = Race...Ethnicity, y = Days_In_Dataset)) +
   geom_bar(stat = "identity") +
   labs(x = "Race...Ethnicity", y = "Average Length of Time") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.background = element_rect(fill = "white"))
+
+# Save the plot as a PNG file in the 'output' folder 
+ggsave("output/racetime_figure.png", width = 6, height = 4)
