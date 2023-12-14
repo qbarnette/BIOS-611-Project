@@ -1,5 +1,16 @@
 #generate racetime figure
 
+library(stringr)
+library(tidyverse)
+library(lubridate)
+
+merged_data <- read.csv("source_data/merged_data.csv")
+
+#recode Race so that any response with multiple responses is "Multiple"
+unique(merged_data$Race...Ethnicity)
+
+merged_data$Race...Ethnicity[str_detect(merged_data$Race...Ethnicity, ",")] = "Multiple"
+
 # Convert the "DLC" column to a Date object
 merged_data$DLC <- mdy(merged_data$DLC)  # Assumes month-day-year format, adjust if needed
 

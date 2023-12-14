@@ -1,5 +1,8 @@
 #generate state figure
 
+library(ggplot2)
+merged_data <- read.csv("source_data/merged_data.csv")
+
 ggplot(merged_data, aes(x = State)) +
   geom_bar(fill = "lightblue") +
   labs(title = "Missing Persons by State") +

@@ -1,5 +1,8 @@
 #generate race count figure
 
+library(stringr)
+library(tidyverse)
+
 merged_data <- read.csv("source_data/merged_data.csv")
 
 

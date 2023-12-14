@@ -1,3 +1,10 @@
+
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+
+merged_data <- read.csv("source_data/merged_data.csv")
+
 # Ensure that 'Missing.Age' is a character column
 merged_data$Missing.Age <- as.character(merged_data$Missing.Age)
 
@@ -22,4 +29,4 @@ ggplot(missing_by_age_group, aes(x = reorder(Age_Group, -Count), y = Count, fill
 
 
 # Save the plot as a PNG file in the 'output' folder 
-ggsave("output/agegroup_figure.png", width = 6, height = 4)
+ggsave("output/age_group_figure.png", width = 6, height = 4)
