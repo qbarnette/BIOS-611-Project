@@ -32,7 +32,7 @@ Password: squirtle1996
 Run the following script in the rstudio terminal to remove the report and all intermediate figures from the output folder: 
 
 ```bash
-make report
+make clean
 ```
 
 To make all figures and reports, run the following bash scripts in the rstudio terminal:
