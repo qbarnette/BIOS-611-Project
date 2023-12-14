@@ -2,44 +2,23 @@
 DATA_FOLDER = source_data
 OUTPUT_FOLDER = output
 SCRIPT_FOLDER = scripts
-REPORT_FOLDER = reports
 
-# Targets
-all: clean preprocess analyze visualize report
+.PHONY: clean
+
+all: clean preprocess visualize analyze report
 
 clean:
     # Remove any existing output files
 	rm -rf $(OUTPUT_FOLDER)/*
+	rm -f Report.pdf
 
 preprocess: prep_data
 
-analyze: linreg_race linreg_sex
-
 visualize: age_group_figure state_figure sex_figure racecount_figure racetime_figure
 
-#report: 
-	#$(REPORT_FOLDER)/report.pdf
-# Report target
-	#$(REPORT_FOLDER)/report.pdf: $(REPORT_FOLDER)/report.Rmd
-	#Rscript -e "rmarkdown::render('$(REPORT_FOLDER)/report.Rmd', output_dir = '$(REPORT_FOLDER)', output_file = 'report.pdf')"
+analyze: linreg_race linreg_sex
 
-clean-all: clean
-    # Remove all generated files and folders except source code and data
-	rm -rf $(OUTPUT_FOLDER)/*
-	rm -rf $(REPORT_FOLDER)/*
-
-# Individual targets for each script
-
-#report:
-	#$(REPORT_FOLDER)/report.Rmd
-   # Rscript -e "rmarkdown::render('report.Rmd', output_dir = '$(REPORT_FOLDER)', output_file = 'report.pdf')"
-
-# Report target
-report: $(REPORT_FOLDER)/report.pdf
-
-$(REPORT_FOLDER)/report.pdf: $(REPORT_FOLDER)/report.Rmd
-	Rscript -e "rmarkdown::render('report.Rmd', output_format = 'pdf_document', output_dir = '$(REPORT_FOLDER)', output_file = 'report.pdf')"
-
+report: report.pdf
 
 prep_data:
 	Rscript $(SCRIPT_FOLDER)/prep_data.R
@@ -70,3 +49,5 @@ linreg_sex: prep_data
 linreg_race: prep_data
 	Rscript $(SCRIPT_FOLDER)/linreg_race.R
 
+report.pdf: Report.Rmd output/racecount_figure.png output/sex_figure.png output/state_figure.png output/age_group_figure.png output/racetime_figure.png 
+	Rscript -e "rmarkdown::render('./Report.Rmd')"
