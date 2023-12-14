@@ -11,30 +11,41 @@ This repository can be built using a Docker with the command below:
 ```bash
 docker build -t 611-example .
 ```
-
 Then start your container using the following command:
 
 ```bash
 docker run -p 8787:8787 -v $(pwd):/home/rstudio/project -it 611-example
 ```
 
-If using git bash, the following command will work to launch the container:
+If using git bash on a windows machine, the following command will work to launch the container:
 
 ```bash
 winpty docker run -p 8787:8787 -v "$(pwd)":/home/rstudio/project -it 611-example
 ```
 
 You then visit http://localhost:8787 via a browser on your machine to access the machine and development environment.
+Username: rstudio 
+Password: squirtle1996
 
-## What to Look at
+## Generating outputs
 
-If you want to generate a specific result, you can also do so by entering the following command:
+Run the following script in the rstudio terminal to remove the report and all intermediate figures from the output folder: 
 
 ```bash
-make scripts/racecount_figure
+make report
 ```
 
-The following command will generate the final report:
+To make all figures and reports, run the following bash scripts in the rstudio terminal:
+
+```bash
+make racecount_figure
+make sex_figure
+make make age_group_figure
+make state_figure
+make racetime_figure
+```
+
+After generating all figures, the following script will generate the final report:
 
 ```bash
 make report
