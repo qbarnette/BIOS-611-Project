@@ -40,7 +40,7 @@ To make all figures and reports, run the following bash scripts in the rstudio t
 ```bash
 make racecount_figure
 make sex_figure
-make make age_group_figure
+make age_group_figure
 make state_figure
 make racetime_figure
 ```
